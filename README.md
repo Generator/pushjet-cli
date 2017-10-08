@@ -2,7 +2,7 @@
 `pushjet-cli` is a simple shell/CLI interface to the PushJet API with minimum requiremens.
 
 ## Requirements
-**bash**
+**bash**  
 **curl**
 
 # Usage

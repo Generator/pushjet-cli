@@ -107,7 +107,7 @@ fi
 
 if [ -n "${S}" ]; then
       SERVERURL="${S}"
-elif [ -z $SECRET ]; then
+elif [ -z $SERVERURL ]; then
       SERVERURL="https://api.pushjet.io"
 fi 
 

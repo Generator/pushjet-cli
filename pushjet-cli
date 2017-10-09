@@ -1,28 +1,41 @@
 #!/bin/bash
 
-# OPTIONS
-SECRET=""
+# pushjet-cli simple cli interface to the PushJet API
+# Website - https://github.com/Generator/pushjet-cli
+# Author: Generator - https://github.com/Generator
 
-# STUFF
+
 usage() { 
-echo "Usage:" 
-echo "    -m \"<message>\"   - The notification text." 
-echo "    -t \"<title>\"     - A custom message title. [optional] "
-echo "    -l <level>       - The importance level from 1(low) to 5(high). [optional]" 
-echo "    -u <link>        - An optional link. [optional]" 
-echo "    -s <secret>      - The service secret token. [optional]" 
-echo 
-echo "Secret must be set on options of $0 or with -s <secret>"
+echo "Usage: 
+    -m \"<message>\"   - The notification text.
+    -t \"<title>\"     - A custom message title. [optional] 
+    -l <level>       - The importance level from 1(low) to 5(high). [default 3]
+    -u <link>        - An optional link. 
+    -s <secret>      - The service secret token.
+    -S               - Custom server URL.
+    -C               - Custom configuration.    
+    -h               - Show help."
 exit 0; }
 
-while getopts ":s:u:l:t:m:h:" o; do
+if [ ! "$(which curl)" ]; then
+	"pushjet-cli requires curl to run. Please install curl."
+	exit 2
+fi
+
+while getopts ":s:u:l:t:m:h:S:C:" o; do
 	case "${o}" in
 	    s)
 	        s=${OPTARG}
 	        ;;
+		S)
+			S=${OPTARG}
+			;;
+		C)
+			C=${OPTARG}
+			;;				
 		u)
 			u=${OPTARG}
-			;;
+			;;		
 		l)
 			l=${OPTARG}
 			;;
@@ -32,7 +45,7 @@ while getopts ":s:u:l:t:m:h:" o; do
 		m)
 			m=${OPTARG}
 			;;
-	    h|-help)
+	    h)
 	        usage
 	        ;;
         \? )
@@ -51,8 +64,26 @@ if [ -z "${m}" ]; then
 	return 1
 fi
 
+# source configuration file
+
+if [ -n "${C}" ]; then    
+	  pushjetcfg="${C}"
+	  . $pushjetcfg
+elif [ -r $HOME/.config/pushjet-cli ]; then
+    pushjetcfg=$HOME/.config/pushjet-cli
+    . $pushjetcfg	  
+elif [ -r /etc/pushjet-cli ]; then
+      pushjetcfg=/etc/pushjet-cli
+      . $pushjetcfg
+fi
+
+
 if [ -z "${s}" ] && [ -z $SECRET ]; then
-   echo "You may specify your secret with -s <SECRET> or define it on $0 options"
+   echo "You may enter your secret on one configuration file: 
+       /etc/pushjet-cli 
+       ~/.config/pushjet-cli
+       
+  Or use -s <SECRET>"
    exit 2
 fi
 
@@ -74,5 +105,11 @@ else
       secret="${SECRET}"
 fi 
 
+if [ -n "${S}" ]; then
+      serverurl="${S}"
+else
+      serverurl="https://api.pushjet.io"
+fi 
+
       
-curl --data "secret=${secret}" --data-urlencode "message=${m}" --data "level=${level}" --data-urlencode "title=${title}" --data "link=${u}" https://api.pushjet.io/message > /dev/null 2>&1
+curl --data "secret=${secret}" --data-urlencode "message=${m}" --data "level=${level}" --data-urlencode "title=${title}" --data "link=${u}" ${serverurl}/message > /dev/null 2>&1

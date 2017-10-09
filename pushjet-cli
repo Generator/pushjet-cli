@@ -106,10 +106,10 @@ else
 fi 
 
 if [ -n "${S}" ]; then
-      serverurl="${S}"
-else
-      serverurl="https://api.pushjet.io"
+      SERVERURL="${S}"
+elif [ -z $SECRET ]; then
+      SERVERURL="https://api.pushjet.io"
 fi 
 
       
-curl --data "secret=${secret}" --data-urlencode "message=${m}" --data "level=${level}" --data-urlencode "title=${title}" --data "link=${u}" ${serverurl}/message > /dev/null 2>&1
+curl --data "secret=${secret}" --data-urlencode "message=${m}" --data "level=${level}" --data-urlencode "title=${title}" --data "link=${u}" ${SERVERURL}/message > /dev/null 2>&1
